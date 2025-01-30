@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./api-service
+      dockerfile: Dockerfile
+    container_name: laravel_dev
+    volumes:
+      - ./api-service:/app
+    depends_on:
+      - mysql
+    network_mode: host
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql_dev
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    network_mode: host
+    volumes:
+      - db_data:/var/lib/mysql
+
+  frontend:
+    build:
+      context: ./ui-service
+      dockerfile: Dockerfile
+    container_name: nextjs_dev
+    volumes:
+      - ./ui-service:/app
+    depends_on:
+      - api
+    network_mode: host
+
+volumes:
+  db_data:
