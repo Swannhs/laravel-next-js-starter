@@ -1,40 +1,37 @@
 version: '3.8'
 
 services:
-  api:
+  app:
     build:
       context: ./api-service
       dockerfile: Dockerfile
     container_name: laravel_dev
+    working_dir: /var/www/html
     volumes:
-      - ./api-service:/app
-    depends_on:
-      - mysql
+      - ./api-service:/var/www/html
     network_mode: host
+    depends_on:
+      - db
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_HOST=db
+      - DB_DATABASE=laravel
+      - DB_USERNAME=user
+      - DB_PASSWORD=secret
 
-  mysql:
+  db:
     image: mysql:8.0
     container_name: mysql_dev
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: laravel
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
-    network_mode: host
+      MYSQL_USER: user
+      MYSQL_PASSWORD: secret
+      MYSQL_ROOT_PASSWORD: rootpassword
     volumes:
-      - db_data:/var/lib/mysql
-
-  frontend:
-    build:
-      context: ./ui-service
-      dockerfile: Dockerfile
-    container_name: nextjs_dev
-    volumes:
-      - ./ui-service:/app
-    depends_on:
-      - api
+      - dbdata:/var/lib/mysql
     network_mode: host
 
 volumes:
-  db_data:
+  dbdata:

@@ -1,31 +1,38 @@
-# Use PHP 8.2 FPM base image
-FROM php:8.2-fpm
+FROM php:8.2-apache
 
-WORKDIR /app
+WORKDIR /var/www/html
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     zip \
     unzip \
+    git \
+    curl \
+    libonig-dev \
+    libxml2-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql gd
+    && docker-php-ext-install pdo pdo_mysql gd mbstring xml
 
-# Install Composer
+RUN a2enmod rewrite
+
+RUN sed -i 's/Listen 80/Listen 8000/' /etc/apache2/ports.conf \
+    && sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:8000>/' /etc/apache2/sites-available/000-default.conf
+
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /etc/apache2/sites-available/000-default.conf
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy Laravel project files
 COPY . .
 
-# Install Laravel dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions
-RUN chown -R www-data:www-data /app/storage /app/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache \
+    && chmod -R 777 /var/www/html/storage/logs
 
-EXPOSE 9000
-CMD ["php-fpm"]
+EXPOSE 8000
+
+CMD ["apache2-foreground"]
