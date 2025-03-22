@@ -12,13 +12,9 @@ services:
     network_mode: host
     depends_on:
       - db
-    environment:
-      - APP_ENV=local
-      - APP_DEBUG=true
-      - DB_HOST=db
-      - DB_DATABASE=laravel
-      - DB_USERNAME=user
-      - DB_PASSWORD=secret
+    env_file:
+      - api-service/.env
+    command: php artisan serve
 
   db:
     image: mysql:8.0

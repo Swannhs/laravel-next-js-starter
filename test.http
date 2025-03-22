@@ -1,0 +1,24 @@
+### GET request to example server
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=PhpStorm
+
+###
+
+POST http://localhost:8000/api/login
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "password"
+}
+
+###
+
+POST localhost:8000/api/register
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "email": "test@example.com",
+    "password": "password"
+}
